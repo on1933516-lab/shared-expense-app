@@ -48,5 +48,10 @@ Flutter Web の画面から API を呼び出すと、API Gateway が受け取り
 
 ---
 
-## 全体構成図（テキスト版）
+## 全体構成図
+![アーキ図](docs/images/architecture-diagram.png)
+
+## レイアウト
+![レイアウト](docs/images/image.png)
+
 
