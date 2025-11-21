@@ -20,7 +20,7 @@
 ## 3. API Gateway → Lambda → DynamoDB のバックエンド処理
 
 Flutter Web の画面から API を呼び出すと、API Gateway が受け取り  
-パスごとに適切な Lambda にルーティングされる。
+パスごとに適切な Lambda にルーティングされる
 
 ###  API 一覧と対応 Lambda
 
