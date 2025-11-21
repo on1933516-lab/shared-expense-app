@@ -1,47 +1,52 @@
- architecture.md
+# アーキテクチャ概要（Shared Expense App）
 
-１．	利用者がCloudFront の URL にアクセスする。
-　　　 この時、WAFで許可/拒否を判定する。
-     （１）	許可
-            ⇒２．へ進む。
-     （２）	拒否
-            ⇒CloudFrontのerror response 設定によりsorryページを表示する。
+## 1. CloudFront へのアクセスと WAF 制御
 
-２．	CloudFront はオリジンである S3 にリクエストする。
-      デフォルトルートオブジェクト設定に従い、
-      S3 から index.html を取得して利用者へ返す。
-     （flutterベースでUI等フロント部分やAPI呼び出しを構築）
+1. 利用者が CloudFront の URL にアクセスする  
+2. WAF がアクセス元 IP を確認し、許可/拒否を判定する  
+   - **許可 ⇒** 次の処理へ進む  
+   - **拒否 ⇒** CloudFront の *Error Response* 設定により **sorry ページ** を返す
 
-３．	API Gateway がリクエストを受け取る。
-      Flutter（ブラウザ）でのユーザー操作によって、
-      API 呼び出し（POST / GET / PUT / DELETE）が API Gateway に送られる。
-      API Gateway は HTTP API として動作しており、適切な Lambda を呼び出す。
-     （１）/expenses/POST
-　　　     Lambda：shared-expenses-create
-　　　     処理内容：DynamoDB に新規データを登録
-     （２）/expenses/GET
-　　     　Lambda：shared-expenses-get
-　     　　処理内容：DynamoDB からデータ一覧を取得し、日付順で返す
-     （３）/expenses/{id}/DELETE
-　     　　Lambda：shared-expenses-delete
-　　　     処理内容：指定 id のデータを DynamoDB から削除
-     （４）/expenses/{id}/PUT
-　　     　Lambda：shared-expenses-update
-           処理内容：指定 id の項目の settled を true（精算済み） に更新
+---
 
-４．DynamoDBのテーブル構成
-　　
-　　　| カラム名 | 説明 | 型 |
-　　　|---------|------|-----|
-　　　| id      | 一意のID（PK） | String |
-　　　| amount  | 金額 | Number |
-　　　| category | 項目名 | String |
-　　　| date    | 日付（YYYY-MM-DD） | String |
-　　　| members | 人数 | Number |
-　　　| note    | 備考 | String |
-　　　| payer   | 支払者名 | String |
-　　　| settled | 精算済みかど
+## 2. CloudFront → S3 のフロントエンド配信
 
+- CloudFront はオリジンとして設定された **S3 バケット** にアクセスする
+- デフォルトルートオブジェクト設定（`index.html`）に従い  
+  Flutter Web でビルドされた UI（`main.dart.js` 等）が返される
 
+---
 
- 
+## 3. API Gateway → Lambda → DynamoDB のバックエンド処理
+
+Flutter Web の画面から API を呼び出すと、API Gateway が受け取り  
+パスごとに適切な Lambda にルーティングされる。
+
+### 📌 API 一覧と対応 Lambda
+
+| HTTP Method | Path              | Lambda 名                     | 処理内容 |
+|-------------|-------------------|-------------------------------|----------|
+| POST        | /expenses         | shared-expenses-create        | DynamoDB に新規データを保存 |
+| GET         | /expenses         | shared-expenses-get           | DynamoDB からデータ一覧を取得し返却 |
+| DELETE      | /expenses/{id}    | shared-expenses-delete        | 指定 ID のデータを削除 |
+| PUT         | /expenses/{id}    | shared-expenses-update        | 指定 ID の `settled` を true に更新 |
+
+---
+
+## 4. DynamoDB テーブル構成
+
+| カラム名   | 説明             | 型      |
+|------------|------------------|---------|
+| id         | 一意の ID（PK）   | String |
+| amount     | 金額             | Number |
+| category   | 項目名           | String |
+| date       | 日付（YYYY-MM-DD）| String |
+| members    | 人数             | Number |
+| note       | 備考             | String |
+| payer      | 支払者名         | String |
+| settled    | 精算済みフラグ   | Boolean |
+
+---
+
+## 全体構成図（テキスト版）
+
