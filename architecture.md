@@ -55,8 +55,8 @@ Flutter Web の画面から API を呼び出すと、API Gateway が受け取り
 ### 未精算一覧画面
 ![レイアウト](docs/images/image.png)
 ### 精算済み一覧画面
-![レイアウト](docs/images/image.png3)
+![レイアウト](docs/images/image3.png)
 ### 支出登録画面
-![レイアウト](docs/images/image.png2)
+![レイアウト](docs/images/image2.png)
 
 
